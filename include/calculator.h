@@ -16,6 +16,10 @@ double log10(double arg);
 double log_base(double arg, double base);
 double ln(double arg);
 
+double root_n(double arg, double index);
+double sqrt(double arg);
+double factorial(double arg);
+
 enum TRIG_FUNCS {
     SIN,
     COS,
@@ -41,7 +45,7 @@ enum ROUNDING_FUNCS {
 //TO IMPLEMENT
 enum OTHER_FUNCS {
     FACTORIAL,
-    SQRT,
+    ROOT,
     ABS,
     SIGN
 };
@@ -55,10 +59,16 @@ enum LOGARITHMIC_FUNCS {
 enum TRIG_FUNCS get_trig_func(const char *name);
 enum LOGARITHMIC_FUNCS get_log_func(const char *name);
 
+bool is_root_func(const char *name);
+bool is_sqrt_func(const char *name);
+bool is_factorial_func(const char *name);
+bool is_abs_func(const char *name);
+bool is_sign_func(const char *name);
+
 double evaluate_trig_func(double (*trig_func)(double), double argument);
 bool is_trig_func(const char *name);
 
 bool is_log_func(const char *name);
 double evaluate_log_func(double (*log_func)(double), double argument);
-
+double evaluate_root_func(double argument, double index);
 #endif //CALCULATOR_H
