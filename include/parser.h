@@ -1,6 +1,8 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include "Node.h"
+
 extern const char *p;
 
 bool char_is_number(void);
@@ -12,13 +14,15 @@ bool char_is_alpha(void);
 
 int char_to_int(void);
 
-double factor(void);
-double term(void);
-double expression(void);
+Node* factor(void);
+Node* term(void);
+Node* expression(void);
 
 double sum(double a, double b);
 double sub(double a, double b);
 double prod(double a, double b);
 double div(double a, double b);
+
+double evaluate_AST(Node* root);
 
 #endif //PARSER_H

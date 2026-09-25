@@ -10,6 +10,10 @@ add_executable(
         src/parser.c
         include/calculator.h
         include/parser.h
+        include/Node.h
+        src/Node.c
+        include/error.h
+        src/error.c
 )
 
 target_include_directories(

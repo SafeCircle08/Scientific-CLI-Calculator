@@ -1,10 +1,10 @@
 #include <stdio.h>
+#include <string.h>
 #include "math.h"
 #include "parser.h"
-
-#include <string.h>
-
 #include "calculator.h"
+#include "Node.h"
+#include "error.h"
 
 const char* p;
 
@@ -57,6 +57,7 @@ double collect_number() {
 }
 
 double evaluate_parentesis() {
+    /*
     double number = 0;
 
     if (char_is('(')) char_increment();
@@ -66,17 +67,21 @@ double evaluate_parentesis() {
     char_skip_spaces();
     if (char_is(')')) char_increment();
     return number;
+    */
 }
 
-double evaluate_parentesis_type(const char c1, const char c2) {
-    double number;
+Node* evaluate_parentesis_AST() {
+    Node* number = NULL;
 
-    if (char_is(c1)) char_increment();
+    if (!char_is('(')) throw_parenthesis_error();
+    char_increment();
 
-    number = collect_number();
+    number = expression();
 
     char_skip_spaces();
-    if (char_is(c2)) char_increment();
+    if (!char_is(')')) throw_parenthesis_error();
+
+    char_increment();
     return number;
 }
 
@@ -98,7 +103,6 @@ void manage_trig_funcs(double *number, const char *trig_func_name) {
         case COT: *number = evaluate_trig_func(cot, argument); break;
     }
 }
-
 void manage_log_funcs(double *number, const char *log_func_name) {
     enum LOGARITHMIC_FUNCS func = get_log_func(log_func_name);
 
@@ -124,16 +128,11 @@ void manage_log_funcs(double *number, const char *log_func_name) {
     }
 }
 
-//Manages numbers
-double factor(void) {
+Node* factor() {
     char_skip_spaces();
     char function_name[20];
     int i = 0;
-    double number = 0.0;
-
-    if (char_is_number() || char_is('.')) {
-        number = collect_number();
-    }
+    Node* node = NULL;
 
     if (char_is_alpha()) {
         while (char_is_alpha()) {
@@ -143,87 +142,124 @@ double factor(void) {
         }
         function_name[i] = '\0';
 
-        if (strcmp(function_name, "e") == 0) number = e;
-        else if (strcmp(function_name, "pi") == 0) {
-            number = M_PI;
-        }
+        if (strcmp(function_name, "e") == 0) node = new_node_number(e);
+        else if (strcmp(function_name, "pi") == 0) node = new_node_number(M_PI);
+        else if (is_trig_func(function_name)) {
+            node = evaluate_parentesis_AST();
 
-        if (is_trig_func(function_name)) manage_trig_funcs(&number, function_name);
-        if (is_log_func(function_name)) manage_log_funcs(&number, function_name);
+            if (strcmp(function_name, "sin") == 0) {
+                node = new_node_unary(NODE_SIN, node);
+            } else if (strcmp(function_name, "cos") == 0) {
+                node = new_node_unary(NODE_COS, node);
+            } else if (strcmp(function_name, "tan") == 0) {
+                node = new_node_unary(NODE_TAN, node);
+            }
+        } else if (is_log_func(function_name)) {
+            Node* node_base = NULL;
+            char_show();
+            if (strcmp(function_name, "log_") == 0) {
+                if (char_is('(')) {
+                    node_base = evaluate_parentesis_AST();
+                }
+                else node_base = new_node_number(collect_number());
+            }
 
-        if (is_root_func(function_name)) {
-            double root_index = collect_number();
-            double argument = evaluate_parentesis();
-            number = evaluate_root_func(argument, root_index);
-        }
+            node = evaluate_parentesis_AST();
 
-        if (is_sqrt_func(function_name)) {
-            double argument = evaluate_parentesis();
-            number = evaluate_root_func(argument, 2.0);
-        }
+            if (strcmp(function_name, "log") == 0) {
+                node = new_node_unary(NODE_LOG, node);
+            } else if (strcmp(function_name, "ln") == 0) {
+                node = new_node_unary(NODE_LN, node);
+            } else if (strcmp(function_name, "log_") == 0) {
+                node = new_node_binary(NODE_LOG_BASE, node, node_base);
+            }
+        } else throw_invalid_function_error();
     }
 
-    if (char_is('(')) number = evaluate_parentesis();
+    if (char_is_number() || char_is('.')) {
+        node = new_node_number(collect_number());
+    }
+
+    if (char_is('(')) {
+        node = evaluate_parentesis_AST();
+    }
 
     if (char_is('!')) {
-        double argument = number;
-        number = factorial(argument);
-
         char_increment();
+        node = new_node_unary(NODE_FACTORIAL, node);
     }
 
     if (char_is('^')) {
-        double base = number;
-        double exponent;
-        number = 1.0;
-
         char_increment();
 
-        if (char_is('(')) exponent = evaluate_parentesis();
-        else exponent = collect_number();
+        Node* exponent;
 
-        char_increment();
-        number = pow(base, exponent);
+        if (char_is('(')) exponent = evaluate_parentesis_AST();
+        else exponent = new_node_number(collect_number());
+
+        node = new_node_binary(NODE_POW, node, exponent);
     }
-    return number;
+    return node;
 }
 
-//Manages / and *
-double term(void) {
+Node* term() {
     char_skip_spaces();
-    double result = factor();
+    Node* term_node = factor();
     char_skip_spaces();
 
     while (char_is('*') || char_is('/')) {
-        printf("Ok *\n");
         char operator = *p;
         char_increment();
         char_skip_spaces();
 
-        double value = factor();
-        if (operator == '*') result = mul(result, value);
-        else if (operator == '/') result = div(result, value);
-
+        Node* value = factor();
+        if (operator == '*') term_node = new_node_binary(NODE_MUL, term_node, value);
+        else if (operator == '/') term_node = new_node_binary(NODE_DIV, term_node, value);
         char_skip_spaces();
     }
-    return result;
+    return term_node;
 }
 
-double expression(void) {
+Node* expression() {
     char_skip_spaces();
-    double result = term();
+    Node* result = term();
     char_skip_spaces();
 
     while (char_is('+') || char_is('-')) {
         char operator = *p;
         char_increment();
         char_skip_spaces();
-        double value = term();
-
-        if (operator == '+') result = sum(result, value);
-        else if (operator == '-') result = sub(result, value);
-
+        Node* value = term();
+        if (operator == '+') result = new_node_binary(NODE_ADD, result, value);
+        else if (operator == '-') result = new_node_binary(NODE_SUB, result, value);
         char_skip_spaces();
     }
     return result;
+}
+
+double evaluate_AST(Node* node) {
+    if (node == NULL) return 0;
+
+    switch (node->type) {
+        case NODE_NUMBER: return node->value;
+        case NODE_ADD: return evaluate_AST(node->left) + evaluate_AST(node->right);
+        case NODE_SUB: return evaluate_AST(node->left) - evaluate_AST(node->right);
+        case NODE_MUL: return evaluate_AST(node->left) * evaluate_AST(node->right);
+        case NODE_DIV: return evaluate_AST(node->left) / evaluate_AST(node->right);
+
+        case NODE_POW: return pow(
+            evaluate_AST(node->left),
+            evaluate_AST(node->right)
+        );
+
+        case NODE_FACTORIAL: return factorial(evaluate_AST(node->left));
+
+        case NODE_SIN: return sin(evaluate_AST(node->left) * M_PI / 180.0);
+        case NODE_COS: return cos(evaluate_AST(node->left) * M_PI / 180.0);
+        case NODE_TAN: return tan(evaluate_AST(node->left) * M_PI / 180.0);
+
+        case NODE_LOG: return log10(evaluate_AST(node->left));
+        case NODE_LN: return ln(evaluate_AST(node->left));
+        case NODE_LOG_BASE: return log_base(evaluate_AST(node->left), node->right->value);
+    }
 }
