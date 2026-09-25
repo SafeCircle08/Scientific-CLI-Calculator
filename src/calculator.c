@@ -2,6 +2,7 @@
 #include "math.h"
 #include "string.h"
 #include "parser.h"
+#include "error.h"
 
 const double e = 2.71828182845904523536;
 
@@ -28,19 +29,28 @@ enum LOGARITHMIC_FUNCS get_log_func(const char *name) {
 double sum(double a, double b) { return (a + b); }
 double sub(double a, double b) { return (a - b); }
 double mul(double a, double b) { return (a * b); }
-double div(double a, double b) { return (a / b); }
+double div(double a, double b) {
+    if (b == 0.0) throw_dividion_by_zero_error();
+    return (a / b);
+}
 
 double sec(double arg) { return (1 / cos(arg)); }
 double csc(double arg) { return (1 / sin(arg)); }
 double cot(double arg) { return (1 / tan(arg)); }
 
-double log10(double arg) { return log_base(arg, 10); };
-double log_base(double arg, double base) { return (log(arg) / log(base)); };
-double ln(double arg) { return log(arg); };
+double log_base(double arg, double base) {
+    if (arg <= 0) throw_invalid_argument_error();
+    return (log(arg) / log(base));
+}
+double log10(double arg) { return log_base(arg, 10); }
+double ln(double arg) { return log_base(arg, e);}
 
 double root_n(double arg, double index) { return (pow(arg, 1.0 / index)); }
 double sqrt(double arg) { return (pow(arg, 1.0 / 2.0)); }
-double factorial(double arg) { return tgamma(arg + 1); }
+double factorial(double arg) {
+    if (arg < 0 || floor(arg) != arg) throw_invalid_argument_error();
+    return tgamma(arg + 1);
+}
 
 bool is_trig_func(const char *name) {
     return (

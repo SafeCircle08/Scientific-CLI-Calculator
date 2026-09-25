@@ -16,13 +16,19 @@ typedef enum {
     NODE_SIN,
     NODE_COS,
     NODE_TAN,
-    NODE_ASIN,
-    NODE_ACOS,
-    NODE_ATAN,
+
+    NODE_ARCSIN,
+    NODE_ARCCOS,
+    NODE_ARCTAN,
+
+    NODE_SEC,
+    NODE_CSC,
+    NODE_COT,
 
     NODE_LOG,
     NODE_LOG_BASE,
     NODE_LN,
+
     NODE_SQRT,
     NODE_ABS,
 

@@ -12,7 +12,10 @@ bool char_is_number(void) { return (*p >= '0' && *p <= '9'); }
 bool char_is(const char c) { return (*p == c); }
 bool char_is_alpha() { return (*p >= 'a' && *p <= 'z') || (*p == '_'); }
 void char_show() { printf("%c\n", *p); }
-void char_increment() { p++; }
+void char_increment() {
+    //printf("%c\n", *p);
+    p++;
+}
 void char_skip_spaces(void) { while (*p == ' ') char_increment(); }
 int char_to_int() { return *p - '0'; }
 
@@ -80,6 +83,23 @@ Node* evaluate_parentesis_AST() {
 
     char_skip_spaces();
     if (!char_is(')')) throw_parenthesis_error();
+
+    char_increment();
+    return number;
+}
+
+Node* evaluate_abs_parentesis_AST() {
+    Node* number = NULL;
+    bool got_first = false;
+
+    if (!char_is('|')) throw_parenthesis_error();
+    char_increment();
+    got_first = true;
+
+    number = expression();
+
+    char_skip_spaces();
+    if (!char_is('|')) throw_parenthesis_error();
 
     char_increment();
     return number;
@@ -153,10 +173,21 @@ Node* factor() {
                 node = new_node_unary(NODE_COS, node);
             } else if (strcmp(function_name, "tan") == 0) {
                 node = new_node_unary(NODE_TAN, node);
+            } else if (strcmp(function_name, "arcsin") == 0) {
+                node = new_node_unary(NODE_ARCSIN, node);
+            } else if (strcmp(function_name, "arccos") == 0) {
+                node = new_node_unary(NODE_ARCCOS, node);
+            } else if (strcmp(function_name, "arctan") == 0) {
+                node = new_node_unary(NODE_ARCTAN, node);
+            } else if (strcmp(function_name, "sec") == 0) {
+                node = new_node_unary(NODE_SEC, node);
+            } else if (strcmp(function_name, "csc") == 0) {
+                node = new_node_unary(NODE_CSC, node);
+            } else if (strcmp(function_name, "cot") == 0) {
+                node = new_node_unary(NODE_COT, node);
             }
         } else if (is_log_func(function_name)) {
             Node* node_base = NULL;
-            char_show();
             if (strcmp(function_name, "log_") == 0) {
                 if (char_is('(')) {
                     node_base = evaluate_parentesis_AST();
@@ -173,6 +204,9 @@ Node* factor() {
             } else if (strcmp(function_name, "log_") == 0) {
                 node = new_node_binary(NODE_LOG_BASE, node, node_base);
             }
+        } else if (strcmp(function_name, "sqrt") == 0) {
+            node = evaluate_parentesis_AST();
+            node = new_node_unary(NODE_SQRT, node);
         } else throw_invalid_function_error();
     }
 
@@ -247,6 +281,8 @@ double evaluate_AST(Node* node) {
         case NODE_MUL: return evaluate_AST(node->left) * evaluate_AST(node->right);
         case NODE_DIV: return evaluate_AST(node->left) / evaluate_AST(node->right);
 
+        case NODE_SQRT: return sqrt(evaluate_AST(node->left));
+
         case NODE_POW: return pow(
             evaluate_AST(node->left),
             evaluate_AST(node->right)
@@ -258,8 +294,18 @@ double evaluate_AST(Node* node) {
         case NODE_COS: return cos(evaluate_AST(node->left) * M_PI / 180.0);
         case NODE_TAN: return tan(evaluate_AST(node->left) * M_PI / 180.0);
 
+        case NODE_ARCSIN: return asin(evaluate_AST(node->left) * M_PI / 180.0);
+        case NODE_ARCCOS: return acos(evaluate_AST(node->left) * M_PI / 180.0);
+        case NODE_ARCTAN: return atan(evaluate_AST(node->left) * M_PI / 180.0);
+
+        case NODE_SEC: return sec(evaluate_AST(node->left) * M_PI / 180.0);
+        case NODE_CSC: return csc(evaluate_AST(node->left) * M_PI / 180.0);
+        case NODE_COT: return cot(evaluate_AST(node->left) * M_PI / 180.0);
+
         case NODE_LOG: return log10(evaluate_AST(node->left));
         case NODE_LN: return ln(evaluate_AST(node->left));
-        case NODE_LOG_BASE: return log_base(evaluate_AST(node->left), node->right->value);
+        case NODE_LOG_BASE: return log_base(evaluate_AST(node->left), evaluate_AST(node->right));
+
+        default: throw_error(SYNTAX_ERROR, "Invalid node type... How?");
     }
 }

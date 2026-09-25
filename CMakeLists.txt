@@ -14,6 +14,8 @@ add_executable(
         src/Node.c
         include/error.h
         src/error.c
+        include/inputs.h
+        src/inputs.c
 )
 
 target_include_directories(
