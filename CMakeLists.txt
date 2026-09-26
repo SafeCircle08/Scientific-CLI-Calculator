@@ -16,6 +16,10 @@ add_executable(
         src/error.c
         include/inputs.h
         src/inputs.c
+        include/option.h
+        src/option.c
+        include/format.h
+        src/format.c
 )
 
 target_include_directories(

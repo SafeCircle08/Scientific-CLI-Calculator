@@ -164,6 +164,8 @@ Node* factor() {
 
         if (strcmp(function_name, "e") == 0) node = new_node_number(e);
         else if (strcmp(function_name, "pi") == 0) node = new_node_number(M_PI);
+        else if (strcmp(function_name, "x") == 0) node = new_node_variable('x');
+        else if (strcmp(function_name, "=") == 0) {  }
         else if (is_trig_func(function_name)) {
             node = evaluate_parentesis_AST();
 
@@ -269,6 +271,21 @@ Node* expression() {
         char_skip_spaces();
     }
     return result;
+}
+
+Node* equation() {
+    char_skip_spaces();
+    Node* left_part = expression();
+    char_skip_spaces();
+
+    if (char_is('=')) {
+        char_increment();
+        char_skip_spaces();
+
+        Node* right_part = expression();
+
+        return new_node_binary(NODE_EQUAL, left_part, right_part);
+    }
 }
 
 double evaluate_AST(Node* node) {

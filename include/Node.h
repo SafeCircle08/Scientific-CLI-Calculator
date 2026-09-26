@@ -4,6 +4,7 @@
 typedef enum {
     NODE_NUMBER,
     NODE_VARIABLE,
+    NODE_EQUAL,
 
     NODE_ADD,
     NODE_SUB,
@@ -47,7 +48,7 @@ typedef struct Node {
 } Node;
 
 Node* new_node_number(double value);
-Node* new_variable(char variable);
+Node* new_node_variable(char variable);
 
 Node* new_node_unary(NodeType type, Node* child);
 Node* new_node_binary(NodeType type, Node* left, Node* right);

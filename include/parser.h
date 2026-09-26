@@ -17,11 +17,12 @@ int char_to_int(void);
 Node* factor(void);
 Node* term(void);
 Node* expression(void);
+Node* equation(void);
 
 double sum(double a, double b);
 double sub(double a, double b);
 double prod(double a, double b);
-double div(double a, double b);
+double divide(double a, double b);
 
 double evaluate_AST(Node* root);
 

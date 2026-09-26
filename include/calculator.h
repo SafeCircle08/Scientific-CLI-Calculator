@@ -42,12 +42,11 @@ enum ROUNDING_FUNCS {
     TRUNC
 };
 
-//TO IMPLEMENT
 enum OTHER_FUNCS {
     FACTORIAL,
     ROOT,
-    ABS,
-    SIGN
+    ABS, //to implement
+    SIGN //to implement
 };
 
 enum LOGARITHMIC_FUNCS {
@@ -71,4 +70,5 @@ bool is_trig_func(const char *name);
 bool is_log_func(const char *name);
 double evaluate_log_func(double (*log_func)(double), double argument);
 double evaluate_root_func(double argument, double index);
+
 #endif //CALCULATOR_H

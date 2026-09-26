@@ -15,7 +15,7 @@ Node* new_node_number(double value) {
     return ast;
 }
 
-Node* new_variable(char variable) {
+Node* new_node_variable(char variable) {
     Node* ast = malloc(sizeof(Node));
     if (ast != NULL) {
         ast->type = NODE_VARIABLE;
@@ -70,14 +70,32 @@ void show_AST(Node *node, int depth) {
 
     switch (node->type) {
         case NODE_NUMBER: printf("NUMBER: %g\n", node->value); break;
+        case NODE_EQUAL: printf("EQUAL\n"); break;
+        case NODE_VARIABLE: printf("VARIABLE: %c\n", node->variable); break;
+
         case NODE_ADD: printf("ADD\n"); break;
         case NODE_SUB: printf("SUB\n"); break;
         case NODE_MUL: printf("MUL\n"); break;
         case NODE_DIV: printf("DIV\n"); break;
+
         case NODE_POW: printf("POW\n"); break;
         case NODE_FACTORIAL: printf("FACT\n"); break;
-        case NODE_SIN: printf("SIN\n"); break;
 
+        case NODE_SIN: printf("SIN\n"); break;
+        case NODE_COS: printf("COS\n"); break;
+        case NODE_TAN: printf("TAN\n"); break;
+
+        case NODE_ARCSIN: printf("ASIN\n"); break;
+        case NODE_ARCCOS: printf("ACOS\n"); break;
+        case NODE_ARCTAN: printf("ATAN\n"); break;
+
+        case NODE_CSC: printf("CSC\n"); break;
+        case NODE_SEC: printf("SEC\n"); break;
+        case NODE_COT: printf("COT\n"); break;
+
+        case NODE_LOG: printf("LOG\n"); break;
+        case NODE_LN: printf("LN\n"); break;
+        case NODE_LOG_BASE: printf("LOG BASE\n"); break;
         default: printf("ERROR\n"); break;
     }
     show_AST(node->left, depth + 1);

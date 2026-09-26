@@ -29,8 +29,8 @@ enum LOGARITHMIC_FUNCS get_log_func(const char *name) {
 double sum(double a, double b) { return (a + b); }
 double sub(double a, double b) { return (a - b); }
 double mul(double a, double b) { return (a * b); }
-double div(double a, double b) {
-    if (b == 0.0) throw_dividion_by_zero_error();
+double divide(double a, double b) {
+    if (b == 0.0) throw_division_by_zero_error();
     return (a / b);
 }
 
