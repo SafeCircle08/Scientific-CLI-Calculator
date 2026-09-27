@@ -94,3 +94,217 @@ double evaluate_trig_func(double (*trig_func)(double), double argument) {
     return result;
 }
 double evaluate_root_func(double argument, double index) { return (pow(argument, 1.0 / index)); }
+
+Node* expand_power(Node* node) {
+
+    //x^3 -> x * x * x
+
+    Node* result = copy_node(node->left);
+    int exponent = (int)node->right->value;
+
+    for (int i = 1; i < exponent; i++) {
+        result = new_node_binary(
+            NODE_MUL,
+            result,
+            copy_node(node->left)
+        );
+    }
+    return result;
+}
+Node* expand_mul(Node* node) {
+    if (node == NULL) return NULL;
+
+    Node* left = node->left;
+    Node* right = node->right;
+
+    if (left->type == NODE_ADD) {
+        //(A + B) * C = AC + BC
+
+        Node* ac = new_node_binary(
+            NODE_MUL,
+            copy_node(left->left),
+            copy_node(right)
+        );
+
+        Node* bc = new_node_binary(
+            NODE_MUL,
+            copy_node(left->right),
+            copy_node(right)
+        );
+
+        return new_node_binary(
+            NODE_ADD,
+            ac, bc
+        );
+    }
+
+    if (left->type == NODE_SUB) {
+        //(A - B) * C = AC - BC
+        Node* ac = new_node_binary(
+           NODE_MUL,
+           copy_node(left->left),
+           copy_node(right)
+       );
+
+        Node* bc = new_node_binary(
+            NODE_MUL,
+            copy_node(left->right),
+            copy_node(right)
+        );
+
+        return new_node_binary(
+            NODE_SUB,
+            ac, bc
+        );
+    }
+
+    if (right->type == NODE_ADD) {
+        //C * (A + B) = CA + CB
+        Node* ca = new_node_binary(
+            NODE_MUL,
+            copy_node(left),
+            copy_node(right->left)
+        );
+
+        Node* cb = new_node_binary(
+            NODE_MUL,
+            copy_node(left),
+            copy_node(right->right)
+        );
+
+        return new_node_binary(
+            NODE_ADD,
+            ca, cb
+        );
+    }
+
+    if (right->type == NODE_SUB) {
+        //C * (A - B) = CA - CB
+        Node* ca = new_node_binary(
+            NODE_MUL,
+            copy_node(left),
+            copy_node(right->left)
+        );
+
+        Node* cb = new_node_binary(
+            NODE_MUL,
+            copy_node(left),
+            copy_node(right->right)
+        );
+
+        return new_node_binary(
+            NODE_SUB,
+            ca, cb
+        );
+    }
+    return node;
+}
+Node* expand(Node* node) {
+    if (node == NULL) return NULL;
+
+    if (node->type == NODE_POW) {
+        Node* result = expand_power(node);
+        if (result != node)
+            return expand(result);
+    }
+
+    node->left = expand(node->left);
+    node->right = expand(node->right);
+
+    if (node->type == NODE_MUL) {
+        Node* result = expand_mul(node);
+        if (result != node)
+            return expand(result);
+    }
+    return node;
+}
+
+
+Node* simplify(Node* node) {
+    if (node == NULL) return NULL;
+
+
+    node->left = simplify(node->left);
+    node->right = simplify(node->right);
+
+    if (node->type == NODE_MUL) {
+        Node* left = node->left;
+        Node* right = node->right;
+
+        if (left->type == NODE_NUMBER && right->type == NODE_NUMBER) {
+            return new_node_number(left->value * right->value);
+        }
+
+        if (left->type == NODE_NUMBER && left->value == 0)
+            return new_node_number(0);
+        if (right->type == NODE_NUMBER && right->value == 0)
+            return new_node_number(0);
+
+        if (left->type == NODE_NUMBER && left->value == 1)
+            return right;
+        if (right->type == NODE_NUMBER && right->value == 1)
+            return left;
+    }
+
+    if (node->type == NODE_ADD) {
+        Node* left = node->left;
+        Node* right = node->right;
+        if (left->type == NODE_NUMBER && right->type == NODE_NUMBER) {
+            return new_node_number(left->value + right->value);
+        }
+        if (left->type == NODE_NUMBER && left->value == 0)
+            return right;
+        if (right->type == NODE_NUMBER && right->value == 0)
+            return left;
+    }
+
+    if (node->type == NODE_SUB) {
+        Node* left = node->left;
+        Node* right = node->right;
+
+        if (left->type == NODE_NUMBER && right->type == NODE_NUMBER)
+            return new_node_number(left->value - right->value);
+
+        if (right->type == NODE_NUMBER && right->value == 0)
+            return left;
+    }
+
+
+    if (node->type == NODE_DIV) {
+        Node* left = node->left;
+        Node* right = node->right;
+
+        if (right->type == NODE_NUMBER && right->value == 0)
+            throw_division_by_zero_error();
+
+        if (left->type == NODE_NUMBER && left->value == 0)
+            return new_node_number(0);
+
+        if (left->type == NODE_NUMBER && right->type == NODE_NUMBER)
+            return new_node_number(left->value / right->value);
+
+        if (right->type == NODE_NUMBER && right->value == 1)
+            return left;
+    }
+    return node;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

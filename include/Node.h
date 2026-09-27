@@ -53,8 +53,13 @@ Node* new_node_variable(char variable);
 Node* new_node_unary(NodeType type, Node* child);
 Node* new_node_binary(NodeType type, Node* left, Node* right);
 
-void show_AST(Node* root, int depth);
+Node* copy_node(Node* node);
 
+bool node_contains_variable(Node* node);
+bool node_is_variable(Node* node);
+bool node_is_costant(Node* node);
+
+void show_AST(Node* root, int depth);
 void free_Node(Node* node);
 
 #endif //AST_H

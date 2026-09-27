@@ -1,12 +1,13 @@
 #ifndef CALCULATOR_H
 #define CALCULATOR_H
+#include "Node.h"
 
 extern const double e;
 
 double sum(double a, double b);
 double sub(double a, double b);
 double mul(double a, double b);
-double div(double a, double b);
+double divide(double a, double b);
 
 double sec(double arg);
 double csc(double arg);
@@ -70,5 +71,12 @@ bool is_trig_func(const char *name);
 bool is_log_func(const char *name);
 double evaluate_log_func(double (*log_func)(double), double argument);
 double evaluate_root_func(double argument, double index);
+
+Node* expand_power(Node* node);
+Node* expand_mul(Node* node);
+
+Node* simplify(Node* node);
+
+Node* expand(Node* node);
 
 #endif //CALCULATOR_H

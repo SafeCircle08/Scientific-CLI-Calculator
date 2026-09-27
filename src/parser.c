@@ -90,11 +90,9 @@ Node* evaluate_parentesis_AST() {
 
 Node* evaluate_abs_parentesis_AST() {
     Node* number = NULL;
-    bool got_first = false;
 
     if (!char_is('|')) throw_parenthesis_error();
     char_increment();
-    got_first = true;
 
     number = expression();
 

@@ -54,6 +54,39 @@ Node* new_node_binary(NodeType type, Node* left, Node* right) {
     return ast;
 }
 
+bool node_contains_variable(Node* node) {
+    if (node == NULL) return false;
+
+    if (node_is_variable(node)) return true;
+
+    return (node_contains_variable(node->left) ||
+            node_contains_variable(node->right)
+    );
+}
+
+bool node_is_variable(Node* node) {
+    return (node->type == NODE_VARIABLE);
+}
+
+bool node_is_costant(Node* node) {
+    return (node->type == NODE_NUMBER);
+}
+
+
+Node* copy_node(Node* node) {
+    if (node == NULL) return NULL;
+
+    Node* copied_node = malloc(sizeof(Node));
+
+    copied_node->type = node->type;
+    copied_node->value = node->value;
+    copied_node->variable = node->variable;
+    copied_node->left = copy_node(node->left);
+    copied_node->right = copy_node(node->right);
+
+    return copied_node;
+}
+
 void free_Node(Node* node) {
     if (node == NULL) return;
 

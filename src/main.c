@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "calculator.h"
 #include "parser.h"
 #include "inputs.h"
 #include "option.h"
@@ -44,6 +46,18 @@ void show_menu() {
 
 int main(void) {
 
+
+    Node* var_node = new_node_variable('x');
+    Node* num_node = new_node_number(10);
+    Node* mul_node = new_node_binary(NODE_MUL, var_node, num_node);
+
+    p = "(x + 1)^2 = 3 * (x * 2)^2"; // ---> x = 5 - 4
+    Node* expr = equation();
+
+    expr = expand(expr);
+    show_AST(expr, 0);
+
+    /*
     show_menu();
 
     int num = get_valid_option_number_input();
@@ -80,5 +94,6 @@ int main(void) {
         case DERIVATIVE_OPTION: break;
         default:
     }
+    */
     return 0;
 }
